@@ -4,6 +4,13 @@ import { Space_Mono } from "next/font/google";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Note Nexus",
+  description: "コーネルメソッド記法を用いたノートテイキングができるアプリ",
+};
+
 const fontHeading = DM_Sans({
   subsets: ["latin"],
   display: "swap",
