@@ -28,13 +28,27 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function RootLayout({ children }: LayoutProps) {
   return (
-    <html lang="en">
+    <html lang="ja">
       <body
-        className={cn("antialiased", fontHeading.variable, fontBody.variable)}
+        className={cn(
+          "antialiased min-h-screen flex flex-col",
+          fontHeading.variable,
+          fontBody.variable
+        )}
       >
-        {children}
+        <header className="p-4 border-b">
+          <nav className="flex justify-between items-center max-w-7xl mx-auto">
+            <h1 className="text-2xl font-bold font-heading">NoteNexus</h1>
+          </nav>
+        </header>
+        <main className="flex-grow">{children}</main>
+        <footer className="p-4 border-t text-center text-muted-foreground">
+          <div className="max-w-7xl mx-auto">
+            © 2024 NoteNexus. All rights reserved.
+          </div>
+        </footer>
       </body>
     </html>
   );
