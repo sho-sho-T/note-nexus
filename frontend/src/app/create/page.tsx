@@ -4,43 +4,52 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
-export default function Component() {
+const CreateNote = () => {
   return (
-    <div className="flex flex-col h-screen">
-      <header className="bg-primary text-primary-foreground py-2 px-4 flex items-center justify-between">
-        <Link href="#" className="font-medium" prefetch={false}>
-          Home
-        </Link>
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <SaveIcon className="w-5 h-5" />
-          <span className="sr-only">Save</span>
-        </Button>
+    <div className="flex flex-col min-h-screen bg-background">
+      <header className="bg-primary text-primary-foreground py-4 px-6">
+        <div className="max-w-6xl mx-auto w-full flex items-center justify-between">
+          <Link href="/notes" className="font-medium text-lg" prefetch={false}>
+            Notes
+          </Link>
+          <Button variant="ghost" size="icon" className="rounded-full">
+            <SaveIcon className="w-6 h-6" />
+            <span className="sr-only">Save</span>
+          </Button>
+        </div>
       </header>
-      <div className="flex-1 grid grid-rows-[auto_1fr_auto] gap-4 p-6">
-        <div className="border rounded-md p-4 bg-primary/10 transition-colors focus-within:bg-primary/20">
-          <Textarea
-            placeholder="Cue"
-            className="w-full resize-none bg-transparent outline-none"
-          />
+      <main className="flex-1 py-6 px-4 flex flex-col">
+        <div className="max-w-5xl mx-auto space-y-6 w-full flex-1 flex flex-col">
+          <div className="border rounded-lg p-4 bg-card shadow-sm transition-colors focus-within:ring-2 focus-within:ring-primary">
+            <Textarea
+              placeholder="Cue"
+              className="w-full resize-none bg-transparent outline-none text-lg rounded-md"
+              rows={2}
+            />
+          </div>
+          <div className="border rounded-lg p-4 bg-card shadow-sm transition-colors focus-within:ring-2 focus-within:ring-primary flex-1 flex flex-col">
+            <Textarea
+              placeholder="Note"
+              className="w-full flex-1 resize-none bg-transparent outline-none rounded-md text-base leading-relaxed"
+              style={{ minHeight: "200px" }}
+            />
+          </div>
+          <div className="border rounded-lg p-4 bg-card shadow-sm transition-colors focus-within:ring-2 focus-within:ring-primary">
+            <Textarea
+              placeholder="Summary"
+              className="w-full resize-none bg-transparent outline-none text-lg rounded-md"
+              rows={3}
+            />
+          </div>
         </div>
-        <div className="border rounded-md p-4 bg-primary/10 transition-colors focus-within:bg-primary/20">
-          <Textarea
-            placeholder="Note"
-            className="w-full h-full resize-none bg-transparent outline-none"
-          />
-        </div>
-        <div className="border rounded-md p-4 bg-primary/10 transition-colors focus-within:bg-primary/20">
-          <Textarea
-            placeholder="Summary"
-            className="w-full resize-none bg-transparent outline-none"
-          />
-        </div>
-      </div>
+      </main>
     </div>
   );
-}
+};
 
-function SaveIcon(props: any) {
+export default CreateNote;
+
+const SaveIcon = (props: any) => {
   return (
     <svg
       {...props}
@@ -59,4 +68,4 @@ function SaveIcon(props: any) {
       <path d="M7 3v4a1 1 0 0 0 1 1h7" />
     </svg>
   );
-}
+};
