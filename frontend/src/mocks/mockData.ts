@@ -13,6 +13,46 @@ export interface User {
   created_at: Date;
 }
 
+export interface Note {
+  note_id: number;
+  user_id: number;
+  cue: string;
+  note_content: string;
+  summary: string | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Category {
+  category_id: number;
+  user_id: number;
+  category_name: string;
+}
+
+export interface Tag {
+  tag_id: number;
+  user_id: number;
+  tag_name: string;
+}
+
+export interface NoteCategory {
+  note_id: number;
+  category_id: number;
+}
+
+export interface NoteTag {
+  note_id: number;
+  tag_id: number;
+}
+
+export interface UserData {
+  user: User;
+  notes: Note[];
+  categories: Category[];
+  tags: Tag[];
+  noteCategories: NoteCategory[];
+  noteTags: NoteTag[];
+}
 export const mockUsers: User[] = [
   {
     user_id: 1,
@@ -29,93 +69,65 @@ export const mockUsers: User[] = [
 ];
 
 // Notes table
-export interface Note {
-  note_id: number;
-  user_id: number;
-  cue: string;
-  note_content: string;
-  summary: string | null;
-  created_at: Date;
-  updated_at: Date;
-}
-
 export const mockNotes: Note[] = [
   {
     note_id: 1,
     user_id: 1,
-    cue: "サンプル１",
-    note_content: "これはサンプル１ですー",
-    summary: "サンプルサンプル！",
+    cue: "関数の抽出",
+    note_content: "関数を..........",
+    summary: "抽出.....",
     created_at: randomDate(new Date(2023, 0, 1), new Date()),
     updated_at: randomDate(new Date(2023, 0, 1), new Date()),
   },
   {
     note_id: 2,
     user_id: 1,
-    cue: "サンプル２",
-    note_content: "これはサンプル２ですー",
-    summary: "サンプルサンプル！",
+    cue: "変数のインライン下",
+    note_content: "変数を.........",
+    summary: "インライン化\n2. hogehoge\n3.",
     created_at: randomDate(new Date(2023, 0, 1), new Date()),
     updated_at: randomDate(new Date(2023, 0, 1), new Date()),
   },
   {
     note_id: 2,
     user_id: 2,
-    cue: "Brainstorming session",
-    note_content:
-      "1. User profile customization\n2. In-app notifications\n3. Dark mode",
-    summary: "Three main features identified for next sprint",
+    cue: "おほげ",
+    note_content: "おほげ。。。",
+    summary: "hogehoge",
     created_at: randomDate(new Date(2023, 0, 1), new Date()),
     updated_at: randomDate(new Date(2023, 0, 1), new Date()),
   },
 ];
 
 // Categories table
-export interface Category {
-  category_id: number;
-  user_id: number;
-  category_name: string;
-}
-
 export const mockCategories: Category[] = [
   {
     category_id: 1,
     user_id: 1,
-    category_name: "Work Projects",
+    category_name: "FE",
   },
   {
     category_id: 2,
     user_id: 2,
-    category_name: "Personal Goals",
+    category_name: "BE",
   },
 ];
 
 // Tags table
-export interface Tag {
-  tag_id: number;
-  user_id: number;
-  tag_name: string;
-}
-
 export const mockTags: Tag[] = [
   {
     tag_id: 1,
     user_id: 1,
-    tag_name: "Meeting",
+    tag_name: "Rails",
   },
   {
     tag_id: 2,
     user_id: 2,
-    tag_name: "Ideas",
+    tag_name: "React",
   },
 ];
 
 // Note_categories table
-export interface NoteCategory {
-  note_id: number;
-  category_id: number;
-}
-
 export const mockNoteCategories: NoteCategory[] = [
   {
     note_id: 1,
@@ -128,11 +140,6 @@ export const mockNoteCategories: NoteCategory[] = [
 ];
 
 // Note_tags table
-export interface NoteTag {
-  note_id: number;
-  tag_id: number;
-}
-
 export const mockNoteTags: NoteTag[] = [
   {
     note_id: 1,
@@ -143,6 +150,41 @@ export const mockNoteTags: NoteTag[] = [
     tag_id: 2,
   },
 ];
+
+export const getUserData = (userId: number): Promise<UserData> => {
+  return new Promise((resolve) => {
+    // ユーザー情報の取得
+    const user = mockUsers.find((u) => u.user_id === userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const notes = mockNotes.filter((note) => note.user_id === userId);
+    const categories = mockCategories.filter(
+      (category) => category.user_id === userId
+    );
+    const tags = mockTags.filter((tag) => tag.user_id === userId);
+    const noteIds = notes.map((note) => note.note_id);
+    const noteCategories = mockNoteCategories.filter((nc) =>
+      noteIds.includes(nc.note_id)
+    );
+    const noteTags = mockNoteTags.filter((nt) => noteIds.includes(nt.note_id));
+
+    const userData: UserData = {
+      user,
+      notes,
+      categories,
+      tags,
+      noteCategories,
+      noteTags,
+    };
+
+    // 非同期処理をシミュレートするために少し遅延を入れる
+    setTimeout(() => {
+      resolve(userData);
+    }, 100);
+  });
+};
 
 // Simulated API functions
 export const getNotes = (userId: number): Promise<Note[]> => {
