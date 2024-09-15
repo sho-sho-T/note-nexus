@@ -99,7 +99,7 @@ const mockCategories: Category[] = [
   },
   {
     category_id: 2,
-    user_id: 2,
+    user_id: 1,
     category_name: "バックエンド",
   },
 ];
@@ -112,7 +112,7 @@ const mockTags: Tag[] = [
   },
   {
     tag_id: 2,
-    user_id: 2,
+    user_id: 1,
     tag_name: "アイデア",
   },
 ];
