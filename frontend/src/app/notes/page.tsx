@@ -13,9 +13,43 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Pagination, PaginationItem } from "@/components/ui/pagination";
 
 import { useRouter } from "next/navigation";
+import React from "react";
+
+import { UserData, getUserData } from "@/mocks/mockData";
 
 const Notes = () => {
   const router = useRouter();
+  const [user, setUser] = React.useState<UserData["user"] | null>(null);
+  const [notes, setNotes] = React.useState<UserData["notes"]>([]);
+  const [categories, setCategories] = React.useState<UserData["categories"]>(
+    []
+  );
+  const [tags, setTags] = React.useState<UserData["tags"]>([]);
+
+  // TODO: ローディング中のアニメーションや、エラーメッセージの表示をやる
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const fetchNotes = async () => {
+      try {
+        setIsLoading(true);
+
+        const fetchedUserData = await getUserData(1); // user認証処理を実装していないので現時点ではベタ書きをしておく。
+        setUser(fetchedUserData.user);
+        setNotes(fetchedUserData.notes);
+        setCategories(fetchedUserData.categories);
+        setTags(fetchedUserData.tags);
+      } catch (e) {
+        setError("データの取得に失敗しました");
+        console.error("Error fetching notes:", e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNotes();
+  }, []);
 
   const Header = () => {
     return (
@@ -62,39 +96,27 @@ const Notes = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-48">
-              <DropdownMenuItem>
-                <Checkbox />
-                <span className="ml-2">Work</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Checkbox />
-                <span className="ml-2">Personal</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Checkbox />
-                <span className="ml-2">Shopping</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Checkbox />
-                <span className="ml-2">Travel</span>
-              </DropdownMenuItem>
+              {categories.map((category) => (
+                <DropdownMenuItem key={category.id}>
+                  <Checkbox />
+                  <span className="ml-2">{category.name}</span>
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
         <div>
           <h3 className="mb-2 text-sm font-medium text-primary">Tags</h3>
           <div className="flex flex-wrap gap-2">
-            {["Work", "Personal", "Shopping", "Travel", "Idea", "Reminder"].map(
-              (tag) => (
-                <Button
-                  key={tag}
-                  variant="secondary"
-                  className="rounded-full px-3 py-1 text-xs"
-                >
-                  {tag}
-                </Button>
-              )
-            )}
+            {tags.map((tag) => (
+              <Button
+                key={tag.id}
+                variant="secondary"
+                className="rounded-full px-3 py-1 text-xs"
+              >
+                {tag.name}
+              </Button>
+            ))}
           </div>
         </div>
       </div>
@@ -105,56 +127,19 @@ const Notes = () => {
     return (
       <div className="flex-1 overflow-auto p-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[
-            {
-              title: "Grocery List",
-              content:
-                "Milk, eggs, bread, apples, chicken, rice, broccoli, toilet paper, laundry detergent",
-              editedTime: "2 days ago",
-            },
-            {
-              title: "Travel Planning",
-              content:
-                "Book flights, reserve hotel, research activities, pack clothes, get travel insurance",
-              editedTime: "1 week ago",
-            },
-            {
-              title: "Work Tasks",
-              content:
-                "Finish quarterly report, schedule team meeting, follow up with client, update website",
-              editedTime: "3 days ago",
-            },
-            {
-              title: "Personal Goals",
-              content:
-                "Start exercising 3 times a week, read 1 book per month, save $500 per month, learn a new skill",
-              editedTime: "1 month ago",
-            },
-            {
-              title: "Shopping List",
-              content:
-                "New jeans, white t-shirts, running shoes, kitchen utensils, bedding set, desk lamp",
-              editedTime: "2 weeks ago",
-            },
-            {
-              title: "Idea Brainstorm",
-              content:
-                "New product feature, marketing campaign, business expansion, process improvement",
-              editedTime: "1 day ago",
-            },
-          ].map((note, index) => (
+          {notes.map((note, index) => (
             <div
               key={index}
               className="group cursor-pointer rounded-lg bg-card p-4 shadow-sm transition-all duration-200 hover:bg-primary/10"
             >
-              <div className="mb-2 text-lg font-medium text-primary">
-                {note.title}
+              <div className="mb-5 text-lg font-medium text-primary">
+                {note.cue}
               </div>
               <p className="text-sm text-muted-foreground line-clamp-2">
                 {note.content}
               </p>
               <div className="mt-2 text-xs text-muted-foreground">
-                Last edited {note.editedTime}
+                Last edited {String(note.updatedAt)}
               </div>
             </div>
           ))}
