@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import React from "react";
 
 import { UserData, getUserData } from "@/mocks/mockData";
+import { dateFormatter } from "@/utils/dateFormatter";
 
 const Notes = () => {
   const router = useRouter();
@@ -139,7 +140,7 @@ const Notes = () => {
                 {note.content}
               </p>
               <div className="mt-2 text-xs text-muted-foreground">
-                Last edited {String(note.updatedAt)}
+                更新： {dateFormatter(String(note.updatedAt))}
               </div>
             </div>
           ))}
