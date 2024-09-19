@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "@hono/node-server": "^1.12.2",
+    "@hono/zod-validator": "^0.2.2",
+    "bcryptjs": "^2.4.3",
     "hono": "^4.5.10"
   },
   "devDependencies": {
