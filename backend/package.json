@@ -13,11 +13,12 @@
     "@hono/node-server": "^1.12.2",
     "@hono/zod-validator": "^0.2.2",
     "bcryptjs": "^2.4.3",
-    "hono": "^4.5.10"
+    "hono": "^4.6.2"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240909.0",
-    "@types/node": "^22.5.1",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.5.5",
     "nodemon": "^3.1.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
