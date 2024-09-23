@@ -2,12 +2,6 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { Env } from "../types";
-import {
-  createUser,
-  getUser,
-  updateUser,
-  deleteUser,
-} from "../controllers/userController";
 import * as userModel from "../models/user";
 import { hashPassword } from "../utils/passwordUtils";
 
@@ -72,7 +66,7 @@ userRoutes.put(
     if (updatedUser) {
       return c.json({
         message: "ユーザー情報の更新に成功しました",
-        user: updateUser,
+        user: updatedUser,
       });
     } else {
       return c.json({ error: "ユーザーが見つかりません" }, 404);
