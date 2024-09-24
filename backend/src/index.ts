@@ -1,7 +1,12 @@
-import { Hono } from "hono";
+// エントリーポイント
 
-const app = new Hono();
+import app from "./app";
 
-app.get("/", (c) => c.text("hello Hono!"));
+const port = process.env.PORT ? parseInt(process.env.PORT) : 8787;
 
-export default app;
+console.log(`Server is running on port ${port}`);
+
+export default {
+  port,
+  fetch: app.fetch,
+};
