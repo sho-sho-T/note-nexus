@@ -17,7 +17,9 @@ export const create = async (
   }
 
   const result = await db
-    .prepare("INSERT INTO users (username, password) VALUES (?, ?) RETURNING *")
+    .prepare(
+      "INSERT INTO users (username, password_hash) VALUES (?, ?) RETURNING *"
+    )
     .bind(username, password)
     .first<User>();
 
@@ -63,7 +65,7 @@ export const update = async (
   }
 
   if (password) {
-    updateQuery += "password = ?, ";
+    updateQuery += "password_hash = ?, ";
     updateValues.push(password);
   }
 
