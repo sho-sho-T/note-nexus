@@ -1,0 +1,19 @@
+# プロジェクト名の定義
+name = "note-nexus"
+
+# エントリーポイントの指定
+main = "src/index.ts"
+
+# workersランタイムの互換性日付を指定
+compatibility_date = "2023-01-01"
+
+# 開発用
+[[d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "note-nexus-db"
+database_id = "1867e4de-de3a-4908-9090-2de591f3adec"
+
+[
+    vars
+]
+JWT_SECRET = ""
