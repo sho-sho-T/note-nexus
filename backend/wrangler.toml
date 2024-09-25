@@ -12,8 +12,3 @@ compatibility_date = "2023-01-01"
 binding = "DB" # i.e. available in your Worker on env.DB
 database_name = "note-nexus-db"
 database_id = "1867e4de-de3a-4908-9090-2de591f3adec"
-
-[
-    vars
-]
-JWT_SECRET = ""
