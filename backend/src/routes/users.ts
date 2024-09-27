@@ -14,6 +14,8 @@ const userSchema = z.object({
 
 // MEMO: zValidator({検証対象}, {スキーマ}, {optional}})　検証対象：json,form,query,header,cookieなど
 // c.req.valid(); で検証後の値を取得できる
+
+// ユーザーの登録
 userRoutes.post("/", zValidator("json", userSchema), async (c) => {
   const { username, password } = c.req.valid("json");
   const hashedPassword = await hashPassword(password);
@@ -33,6 +35,7 @@ userRoutes.post("/", zValidator("json", userSchema), async (c) => {
   }
 });
 
+// ユーザー情報の取得
 userRoutes.get("/:userId", async (c) => {
   const userId = c.req.param("userId");
   const user = await userModel.findById(c.env.DB, parseInt(userId));
@@ -44,6 +47,7 @@ userRoutes.get("/:userId", async (c) => {
   }
 });
 
+// ユーザー情報の変更
 userRoutes.put(
   "/:userId",
   zValidator("json", userSchema.partial()),
@@ -74,6 +78,7 @@ userRoutes.put(
   }
 );
 
+// ユーザーの削除
 userRoutes.delete("/:userId", async (c) => {
   const userId = c.req.param("userId");
   const deleted = await userModel.remove(c.env.DB, parseInt(userId));
