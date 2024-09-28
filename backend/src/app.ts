@@ -8,6 +8,7 @@ import { prettyJSON } from "hono/pretty-json";
 
 import { Env } from "./types";
 import userRoutes from "./routes/users";
+import authRoutes from "./routes/authRoutes";
 import { errorHandler } from "./middlewares/errorHandler";
 
 const app = new Hono<{ Bindings: Env }>();
@@ -15,11 +16,22 @@ const app = new Hono<{ Bindings: Env }>();
 app.use("*", logger());
 app.use("*", prettyJSON());
 app.use("*", cors());
+
+// 認証ルート
+app.route("/api/auth", authRoutes);
+
+// JWT認証ミドルウェアを設定（ユーザー登録とログイン以外のルートに適用）
 app.use("/api/*", async (c, next) => {
+  // ユーザー登録とログインルートはJWT認証をスキップ
   if (c.req.path === "/api/users" && c.req.method === "POST") {
-    // ユーザー登録エンドポイントはJWT認証をスキップ
     return next();
   }
+
+  if (c.req.path === "/api/auth/login" && c.req.method === "POST") {
+    return next();
+  }
+
+  // その他のルートにJWT認証を適用
   return jwt({ secret: c.env.JWT_SECRET })(c, next);
 });
 
