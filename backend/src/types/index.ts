@@ -6,6 +6,6 @@ export interface Env {
 export interface User {
   user_id: number;
   username: string;
-  password: string;
+  password_hash: string;
   created_at: string;
 }
