@@ -23,7 +23,7 @@ authRoutes.post("/login", zValidator("json", loginSchema), async (c) => {
       return c.json({ error: "ユーザーが見つかりません" }, 401);
     }
 
-    const isPasswordValid = await comparePassword(password, user.password);
+    const isPasswordValid = await comparePassword(password, user.password_hash);
 
     if (!isPasswordValid) {
       return c.json({ error: "パスワードが不正です" }, 401);
