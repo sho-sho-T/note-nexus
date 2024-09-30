@@ -35,7 +35,7 @@ export const findById = async (
   userId: number
 ): Promise<User | null> => {
   return await db
-    .prepare("SELECT * FROM users WHERE user_id = ?")
+    .prepare("SELECT * FROM users WHERE id = ?")
     .bind(userId)
     .first();
 };
@@ -56,31 +56,50 @@ export const update = async (
   username?: string,
   password?: string
 ): Promise<User | null> => {
-  let updateQuery = "UPDATE users SET ";
+  const updateFields = [];
   const updateValues = [];
 
   if (username) {
-    updateQuery += "username = ?, ";
+    updateFields.push("username = ?");
     updateValues.push(username);
   }
 
   if (password) {
-    updateQuery += "password_hash = ?, ";
+    updateFields.push("password_hash = ?");
     updateValues.push(password);
   }
 
-  updateQuery = updateQuery.slice(0, -2) + " WHERE user_id = ?";
-  updateValues.push(userId);
-
-  const result = await db
-    .prepare(updateQuery)
-    .bind(...updateValues)
-    .run();
-  if (!result.success) {
-    return null;
+  // 更新するフィールドがない場合return
+  if (updateFields.length === 0) {
+    return await findById(db, userId);
   }
 
-  return await findById(db, userId);
+  // updated_at フィールドの更新を追加
+  updateFields.push("updated_at = CURRENT_TIMESTAMP");
+
+  const updateQuery = `
+    UPDATE users 
+    SET ${updateFields.join(", ")} 
+    WHERE id = ?
+  `;
+  updateValues.push(userId);
+
+  try {
+    const result = await db
+      .prepare(updateQuery)
+      .bind(...updateValues)
+      .run();
+
+    if (!result.success) {
+      console.error("ユーザー情報の更新に失敗しました:", result);
+      return null;
+    }
+
+    return await findById(db, userId);
+  } catch (error) {
+    console.error("ユーザー情報の更新に失敗しました:", error);
+    return null;
+  }
 };
 
 export const remove = async (
@@ -88,7 +107,7 @@ export const remove = async (
   userId: number
 ): Promise<boolean> => {
   const result = await db
-    .prepare("DELETE FROM users WHERE user_id = ?")
+    .prepare("DELETE FROM users WHERE id = ?")
     .bind(userId)
     .run();
   return result.success;
