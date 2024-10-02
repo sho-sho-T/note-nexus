@@ -13,33 +13,13 @@ const loginSchema = z.object({
   password: z.string().min(1, "パスワードは必須です"),
 });
 
+// ログイン
 authRoutes.post("/login", zValidator("json", loginSchema), async (c) => {
   const { username, password } = c.req.valid("json");
 
   try {
-    const user = await userModel.findByUsername(c.env.DB, username);
-
-    if (!user) {
-      return c.json({ error: "ユーザーが見つかりません" }, 401);
-    }
-
-    const isPasswordValid = await comparePassword(password, user.password_hash);
-
-    if (!isPasswordValid) {
-      return c.json({ error: "パスワードが不正です" }, 401);
-    }
-
-    // 現在のタイムスタンプを取得（秒単位）
-    const currentTimestamp = Math.floor(Date.now() / 1000);
-
-    // JWTトークンの生成
-    const token = await sign(
-      {
-        userId: user.user_id,
-        exp: currentTimestamp + 3600, // 1時間後に期限切れ
-      },
-      c.env.JWT_SECRET
-    );
+    const user = await authenticateUser(username, password, c.env.DB);
+    const token = await generateToken(user.user_id, c.env.JWT_SECRET);
 
     return c.json({
       token,
@@ -50,5 +30,36 @@ authRoutes.post("/login", zValidator("json", loginSchema), async (c) => {
     return c.json({ error: "ログインに失敗しました" }, 500);
   }
 });
+
+// ユーザー認証処理
+const authenticateUser = async (
+  username: string,
+  password: string,
+  db: any
+) => {
+  const user = await userModel.findByUsername(db, username);
+  if (!user) {
+    throw new Error("ユーザーが見つかりません");
+  }
+
+  const isPasswordValid = await comparePassword(password, user.password_hash);
+  if (!isPasswordValid) {
+    throw new Error("パスワードが不正です");
+  }
+
+  return user;
+};
+
+// JWTトークン生成
+const generateToken = async (userId: number, secret: string) => {
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+  return sign(
+    {
+      userId,
+      exp: currentTimestamp + 3600, // 1時間後に期限切れ
+    },
+    secret
+  );
+};
 
 export default authRoutes;
