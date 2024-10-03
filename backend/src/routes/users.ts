@@ -47,7 +47,7 @@ userRoutes.get("/:userId", async (c) => {
   }
 });
 
-// ユーザー情報の変更
+// ユーザー情報更新
 userRoutes.put(
   "/:userId",
   zValidator("json", userSchema.partial()),

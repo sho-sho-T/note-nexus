@@ -31,6 +31,12 @@ authRoutes.post("/login", zValidator("json", loginSchema), async (c) => {
   }
 });
 
+// ログアウト
+authRoutes.post("/logout", async (c) => {
+  // クライアント側でトークンを削除するため何もしない
+  return c.json({ message: "ログアウトに成功しました" });
+});
+
 // ユーザー認証処理
 const authenticateUser = async (
   username: string,
