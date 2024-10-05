@@ -4,8 +4,13 @@ export interface Env {
 }
 
 export interface User {
-  user_id: number;
+  id: number;
   username: string;
   password_hash: string;
   created_at: string;
+}
+
+export interface JWTPayload {
+  userId: number;
+  exp: number; // 有効期限
 }

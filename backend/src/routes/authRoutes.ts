@@ -1,16 +1,22 @@
 import { Hono } from "hono";
-import { sign } from "hono/jwt";
+import { sign, verify } from "hono/jwt";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { Env } from "../types";
+import { Env, JWTPayload } from "../types";
 import * as userModel from "../models/user";
 import { comparePassword } from "../utils/passwordUtils";
 
 const authRoutes = new Hono<{ Bindings: Env }>();
 
+// ログインのスキーマ
 const loginSchema = z.object({
   username: z.string().min(1, "ユーザー名は必須です"),
   password: z.string().min(1, "パスワードは必須です"),
+});
+
+// リフレッシュトークンのスキーマ
+const refreshTokenSchema = z.object({
+  token: z.string().min(1, "トークンは必須です"),
 });
 
 // ログイン
@@ -19,11 +25,11 @@ authRoutes.post("/login", zValidator("json", loginSchema), async (c) => {
 
   try {
     const user = await authenticateUser(username, password, c.env.DB);
-    const token = await generateToken(user.user_id, c.env.JWT_SECRET);
+    const token = await generateToken(user.id, c.env.JWT_SECRET);
 
     return c.json({
       token,
-      user: { id: user.user_id, username: user.username },
+      user: { id: user.id, username: user.username },
     });
   } catch (error) {
     console.log("ログインエラー:", error);
@@ -36,6 +42,33 @@ authRoutes.post("/logout", async (c) => {
   // クライアント側でトークンを削除するため何もしない
   return c.json({ message: "ログアウトに成功しました" });
 });
+
+// トークンのリフレッシュ
+authRoutes.post(
+  "/refresh",
+  zValidator("json", refreshTokenSchema),
+  async (c) => {
+    const { token } = c.req.valid("json");
+
+    try {
+      const payload = (await verify(
+        token,
+        c.env.JWT_SECRET
+      )) as unknown as JWTPayload; // MEMO:  verify関数の戻り値が何であるかをTypeScriptに明示的に伝えるために、as unknownを使う
+
+      if (!payload.userId) {
+        throw new Error("ユーザーIDが見つかりません");
+      }
+
+      const newToken = await generateToken(payload.userId, c.env.JWT_SECRET);
+
+      return c.json({ token: newToken });
+    } catch (error) {
+      console.log("トークンのリフレッシュエラー:", error);
+      return c.json({ error: "トークンのリフレッシュに失敗しました" }, 500);
+    }
+  }
+);
 
 // ユーザー認証処理
 const authenticateUser = async (
@@ -59,13 +92,14 @@ const authenticateUser = async (
 // JWTトークン生成
 const generateToken = async (userId: number, secret: string) => {
   const currentTimestamp = Math.floor(Date.now() / 1000);
-  return sign(
-    {
-      userId,
-      exp: currentTimestamp + 3600, // 1時間後に期限切れ
-    },
-    secret
-  );
+
+  console.log("ユーザーID", userId);
+  const payload = {
+    userId: userId,
+    exp: currentTimestamp + 3600, // 1時間後に期限切れ
+  };
+
+  return sign(payload, secret);
 };
 
 export default authRoutes;
