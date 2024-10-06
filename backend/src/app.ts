@@ -22,12 +22,19 @@ app.route("/api/auth", authRoutes);
 
 // JWT認証ミドルウェアを設定（ユーザー登録とログイン以外のルートに適用）
 app.use("/api/*", async (c, next) => {
-  // ユーザー登録とログインルートはJWT認証をスキップ
-  if (c.req.path === "/api/users" && c.req.method === "POST") {
-    return next();
-  }
+  // JWT認証をスキップするパスとメソッドの組み合わせ
+  const skipAuthPaths = [
+    { path: "/api/users", method: "POST" },
+    { path: "/api/auth/login", method: "POST" },
+    { path: "/api/auth/refresh", method: "POST" },
+  ];
 
-  if (c.req.path === "/api/auth/login" && c.req.method === "POST") {
+  // 現在のリクエストがスキップ対象かどうかをチェック
+  const shouldSkipAuth = skipAuthPaths.some(
+    (route) => c.req.path === route.path && c.req.method === route.method
+  );
+
+  if (shouldSkipAuth) {
     return next();
   }
 
