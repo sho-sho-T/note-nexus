@@ -2,6 +2,7 @@ import { User } from "../types";
 
 // TODO: ORMを使用するようにしたい
 
+// ユーザーの作成
 export const create = async (
   db: D1Database,
   username: string,
@@ -30,6 +31,7 @@ export const create = async (
   return result;
 };
 
+// ユーザー情報の取得
 export const findById = async (
   db: D1Database,
   userId: number
@@ -40,6 +42,7 @@ export const findById = async (
     .first();
 };
 
+// ユーザー名からユーザー情報を取得
 export const findByUsername = async (
   db: D1Database,
   username: string
@@ -50,6 +53,7 @@ export const findByUsername = async (
     .first();
 };
 
+// ユーザー情報の更新
 export const update = async (
   db: D1Database,
   userId: number,
@@ -102,6 +106,7 @@ export const update = async (
   }
 };
 
+// ユーザーの削除
 export const remove = async (
   db: D1Database,
   userId: number
