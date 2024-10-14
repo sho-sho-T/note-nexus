@@ -17,9 +17,6 @@ app.use("*", logger());
 app.use("*", prettyJSON());
 app.use("*", cors());
 
-// 認証ルート
-app.route("/api/auth", authRoutes);
-
 // JWT認証ミドルウェアを設定（ユーザー登録とログイン以外のルートに適用）
 app.use("/api/*", async (c, next) => {
   // JWT認証をスキップするパスとメソッドの組み合わせ
@@ -42,8 +39,13 @@ app.use("/api/*", async (c, next) => {
   return jwt({ secret: c.env.JWT_SECRET })(c, next);
 });
 
+// 認証ルート
+app.route("/api/auth", authRoutes);
+
+// ユーザー情報ルート
 app.route("/api/users", userRoutes);
 
+// エラーハンドリングミドルウェアを設定
 app.use("*", errorHandler);
 
 export default app;
