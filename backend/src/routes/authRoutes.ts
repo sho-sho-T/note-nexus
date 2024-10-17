@@ -41,7 +41,7 @@ authRoutes.post("/login", zValidator("json", loginSchema), async (c) => {
     });
 
     return c.json({
-      token,
+      message: "ログインに成功しました",
       user: { id: user.id, username: user.username },
     });
   } catch (error) {
