@@ -5,6 +5,7 @@ import { z } from "zod";
 import { Env, JWTPayload } from "../types";
 import * as userModel from "../models/user";
 import { comparePassword } from "../utils/passwordUtils";
+import { setCookie } from "hono/cookie";
 
 const authRoutes = new Hono<{ Bindings: Env }>();
 
@@ -24,8 +25,20 @@ authRoutes.post("/login", zValidator("json", loginSchema), async (c) => {
   const { username, password } = c.req.valid("json");
 
   try {
+    // ユーザー認証
     const user = await authenticateUser(username, password, c.env.DB);
+
+    // JWTトークン生成
     const token = await generateToken(user.id, c.env.JWT_SECRET);
+
+    // トークンをCookieにセット
+    setCookie(c, "jwt", token, {
+      httpOnly: true, // JavaScriptからCookieにアクセスできないようにする
+      secure: c.env.NODE_ENV === "production", // HTTPS接続時のみCookieを送信する
+      sameSite: "Lax", // クロスサイトリクエストを制限する
+      maxAge: 3600, // 1時間後に期限切れ
+      path: "/", // クッキーの有効なパス
+    });
 
     return c.json({
       token,
