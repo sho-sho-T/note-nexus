@@ -5,7 +5,7 @@ import { z } from "zod";
 import { Env, JWTPayload } from "../types";
 import * as userModel from "../models/user";
 import { comparePassword } from "../utils/passwordUtils";
-import { setCookie } from "hono/cookie";
+import { getCookie, setCookie } from "hono/cookie";
 
 const authRoutes = new Hono<{ Bindings: Env }>();
 
@@ -61,37 +61,50 @@ authRoutes.post("/logout", async (c) => {
     sameSite: "Lax",
     maxAge: 0, // 有効期限を0に設定してCookieを削除
     path: "/",
-  })
+  });
 
   return c.json({ message: "ログアウトに成功しました" });
 });
 
 // トークンのリフレッシュ
-authRoutes.post(
-  "/refresh",
-  zValidator("json", refreshTokenSchema),
-  async (c) => {
-    const { token } = c.req.valid("json");
+authRoutes.post("/refresh", async (c) => {
+  const token = getCookie(c, "jwt");
 
-    try {
-      const payload = (await verify(
-        token,
-        c.env.JWT_SECRET
-      )) as unknown as JWTPayload; // MEMO:  verify関数の戻り値が何であるかをTypeScriptに明示的に伝えるために、as unknownを使う
-
-      if (!payload.userId) {
-        throw new Error("ユーザーIDが見つかりません");
-      }
-
-      const newToken = await generateToken(payload.userId, c.env.JWT_SECRET);
-
-      return c.json({ token: newToken });
-    } catch (error) {
-      console.log("トークンのリフレッシュエラー:", error);
-      return c.json({ error: "トークンのリフレッシュに失敗しました" }, 500);
-    }
+  if (!token) {
+    return c.json({ error: "トークンが見つかりません" }, 401);
   }
-);
+
+  try {
+    const payload = (await verify(
+      token,
+      c.env.JWT_SECRET
+    )) as unknown as JWTPayload; // MEMO:  verify関数の戻り値が何であるかをTypeScriptに明示的に伝えるために、as unknownを使う
+
+    // トークンの有効期限が切れていたらエラーを返す
+    if (payload.exp < Math.floor(Date.now() / 1000)) {
+      throw new Error("トークンが期限切れです");
+    }
+
+    if (!payload.userId) {
+      throw new Error("ユーザーIDが見つかりません");
+    }
+
+    const newToken = await generateToken(payload.userId, c.env.JWT_SECRET);
+
+    // 新しいトークンをCookieにセット
+    setCookie(c, "jwt", newToken, {
+      httpOnly: true,
+      secure: c.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      maxAge: 3600,
+    });
+
+    return c.json({ message: "トークンのリフレッシュに成功しました" });
+  } catch (error) {
+    console.log("トークンのリフレッシュエラー:", error);
+    return c.json({ error: "トークンのリフレッシュに失敗しました" }, 401);
+  }
+});
 
 // ユーザー認証処理
 const authenticateUser = async (
