@@ -15,11 +15,6 @@ const loginSchema = z.object({
   password: z.string().min(1, "パスワードは必須です"),
 });
 
-// リフレッシュトークンのスキーマ
-const refreshTokenSchema = z.object({
-  token: z.string().min(1, "トークンは必須です"),
-});
-
 // ログイン
 authRoutes.post("/login", zValidator("json", loginSchema), async (c) => {
   const { username, password } = c.req.valid("json");
@@ -52,8 +47,6 @@ authRoutes.post("/login", zValidator("json", loginSchema), async (c) => {
 
 // ログアウト
 authRoutes.post("/logout", async (c) => {
-  // クライアント側でトークンを削除するため何もしない
-
   // Cookieを無効化
   setCookie(c, "jwt", "", {
     httpOnly: true,
@@ -75,7 +68,7 @@ authRoutes.post("/refresh", async (c) => {
   }
 
   try {
-    const payload = (await verify(
+    const payload = (await verify( // verify(): JWTトークンが本物でであり、まだ有効であるかを確認する。
       token,
       c.env.JWT_SECRET
     )) as unknown as JWTPayload; // MEMO:  verify関数の戻り値が何であるかをTypeScriptに明示的に伝えるために、as unknownを使う
