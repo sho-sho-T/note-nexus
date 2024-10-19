@@ -53,6 +53,16 @@ authRoutes.post("/login", zValidator("json", loginSchema), async (c) => {
 // ログアウト
 authRoutes.post("/logout", async (c) => {
   // クライアント側でトークンを削除するため何もしない
+
+  // Cookieを無効化
+  setCookie(c, "jwt", "", {
+    httpOnly: true,
+    secure: c.env.NODE_ENV === "production",
+    sameSite: "Lax",
+    maxAge: 0, // 有効期限を0に設定してCookieを削除
+    path: "/",
+  })
+
   return c.json({ message: "ログアウトに成功しました" });
 });
 
