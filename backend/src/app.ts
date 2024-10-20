@@ -15,7 +15,13 @@ const app = new Hono<{ Bindings: Env }>();
 
 app.use("*", logger());
 app.use("*", prettyJSON());
-app.use("*", cors());
+app.use(
+  "*",
+  cors({
+    origin: "http://localhost:3000", // 特定のオリジンからのリクエストのみ許可（フロントエンドのURL）
+    credentials: true, // クッキーを許可
+  })
+);
 
 // JWT認証ミドルウェアを設定（ユーザー登録とログイン以外のルートに適用）
 app.use("/api/*", async (c, next) => {
