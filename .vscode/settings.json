@@ -1,0 +1,28 @@
+{
+	// エディタ全般の設定
+	"editor.fontSize": 14,
+	"editor.fontFamily": "0xProto Nerd Font",
+	"editor.minimap.enabled": false,
+	"editor.bracketPairColorization.enabled": true,
+	"editor.cursorBlinking": "phase",
+	"editor.cursorSmoothCaretAnimation": "explicit",
+	"editor.cursorStyle": "block",
+	"editor.formatOnPaste": true,
+	"editor.formatOnType": true,
+	"editor.defaultFormatter": "biomejs.biome",
+	"editor.formatOnSave": true,
+	"editor.codeActionsOnSave": {
+		"source.organizeImports.biome": "explicit"
+	},
+	"editor.renderLineHighlight": "all",
+	"editor.renderLineHighlightOnlyWhenFocus": true,
+
+	"files.autoSave": "onFocusChange",
+
+	"[markdown]": {
+		"editor.formatOnSave": true
+	},
+
+	// その他の設定
+	"git.openRepositoryInParentFolders": "never"
+}
