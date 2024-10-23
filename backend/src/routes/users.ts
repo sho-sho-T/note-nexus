@@ -1,15 +1,15 @@
-import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
+import { Hono } from "hono";
 import { z } from "zod";
-import { Env } from "../types";
 import * as userModel from "../models/user";
+import type { Env } from "../types";
 import { hashPassword } from "../utils/passwordUtils";
 
 const userRoutes = new Hono<{ Bindings: Env }>();
 
 const userSchema = z.object({
-  username: z.string().min(3).max(50),
-  password: z.string().min(6),
+	username: z.string().min(3).max(50),
+	password: z.string().min(6),
 });
 
 // MEMO: zValidator({検証対象}, {スキーマ}, {optional}})　検証対象：json,form,query,header,cookieなど
@@ -17,77 +17,74 @@ const userSchema = z.object({
 
 // ユーザーの登録
 userRoutes.post("/", zValidator("json", userSchema), async (c) => {
-  const { username, password } = c.req.valid("json");
-  const hashedPassword = await hashPassword(password);
+	const { username, password } = c.req.valid("json");
+	const hashedPassword = await hashPassword(password);
 
-  try {
-    const user = await userModel.create(c.env.DB, username, hashedPassword);
-    return c.json({ message: "ユーザーの登録に成功しました。", user }, 201);
-  } catch (error) {
-    if (
-      // errorが標準のErrorオブジェクトのインスタンスであるかをチェック
-      error instanceof Error &&
-      error.message === "このユーザーはすでに登録されています。"
-    ) {
-      return c.json({ error: "そのユーザー名はすでに登録されています。" }, 400);
-    }
-    throw error;
-  }
+	try {
+		const user = await userModel.create(c.env.DB, username, hashedPassword);
+		return c.json({ message: "ユーザーの登録に成功しました。", user }, 201);
+	} catch (error) {
+		if (
+			// errorが標準のErrorオブジェクトのインスタンスであるかをチェック
+			error instanceof Error &&
+			error.message === "このユーザーはすでに登録されています。"
+		) {
+			return c.json({ error: "そのユーザー名はすでに登録されています。" }, 400);
+		}
+		throw error;
+	}
 });
 
 // ユーザー情報の取得
 userRoutes.get("/:userId", async (c) => {
-  const userId = c.req.param("userId");
-  const user = await userModel.findById(c.env.DB, parseInt(userId));
+	const userId = c.req.param("userId");
+	const user = await userModel.findById(c.env.DB, Number.parseInt(userId));
 
-  if (user) {
-    return c.json(user);
-  } else {
-    return c.json({ error: "ユーザーが見つかりません" }, 404);
-  }
+	if (user) {
+		return c.json(user);
+	}
+	return c.json({ error: "ユーザーが見つかりません" }, 404);
 });
 
 // ユーザー情報更新
 userRoutes.put(
-  "/:userId",
-  zValidator("json", userSchema.partial()),
-  async (c) => {
-    const userId = c.req.param("userId");
-    const { username, password } = c.req.valid("json");
-    let hashedPassword;
+	"/:userId",
+	zValidator("json", userSchema.partial()),
+	async (c) => {
+		const userId = c.req.param("userId");
+		const { username, password } = c.req.valid("json");
+		let hashedPassword: string | undefined;
 
-    if (password) {
-      hashedPassword = await hashPassword(password);
-    }
+		if (password) {
+			hashedPassword = await hashPassword(password);
+		}
 
-    const updatedUser = await userModel.update(
-      c.env.DB,
-      parseInt(userId),
-      username,
-      hashedPassword
-    );
+		const updatedUser = await userModel.update(
+			c.env.DB,
+			Number.parseInt(userId),
+			username,
+			hashedPassword,
+		);
 
-    if (updatedUser) {
-      return c.json({
-        message: "ユーザー情報の更新に成功しました",
-        user: updatedUser,
-      });
-    } else {
-      return c.json({ error: "ユーザーが見つかりません" }, 404);
-    }
-  }
+		if (updatedUser) {
+			return c.json({
+				message: "ユーザー情報の更新に成功しました",
+				user: updatedUser,
+			});
+		}
+		return c.json({ error: "ユーザーが見つかりません" }, 404);
+	},
 );
 
 // ユーザーの削除
 userRoutes.delete("/:userId", async (c) => {
-  const userId = c.req.param("userId");
-  const deleted = await userModel.remove(c.env.DB, parseInt(userId));
+	const userId = c.req.param("userId");
+	const deleted = await userModel.remove(c.env.DB, Number.parseInt(userId));
 
-  if (deleted) {
-    return c.json({ message: "ユーザーの削除に成功しました" });
-  } else {
-    return c.json({ error: "ユーザーが見つかりません" }, 404);
-  }
+	if (deleted) {
+		return c.json({ message: "ユーザーの削除に成功しました" });
+	}
+	return c.json({ error: "ユーザーが見つかりません" }, 404);
 });
 
 export default userRoutes;
