@@ -4,7 +4,7 @@ import type { Context, Next } from "hono";
 import { Hono } from "hono";
 import { getCookie } from "hono/cookie";
 import { cors } from "hono/cors";
-import { jwt, verify } from "hono/jwt";
+import { verify } from "hono/jwt";
 import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
 
