@@ -71,7 +71,7 @@ export const update = async (
 	userId: number,
 	username?: string,
 	password?: string,
-): Promise<User | null> => {
+): Promise<SafeUser | null> => {
 	const updateFields = [];
 	const updateValues = [];
 
