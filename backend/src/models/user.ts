@@ -1,4 +1,4 @@
-import type { User } from "../types";
+import type { SafeUser, User } from "../types";
 
 // TODO: ORMを使用するようにしたい
 
@@ -7,7 +7,7 @@ export const create = async (
 	db: D1Database,
 	username: string,
 	password: string,
-): Promise<User> => {
+): Promise<SafeUser> => {
 	const existingUser = await db
 		.prepare("SELECT * FROM users WHERE username = ?")
 		.bind(username)
@@ -28,7 +28,10 @@ export const create = async (
 		throw new Error("ユーザーの作成に失敗しました。");
 	}
 
-	return result;
+	return {
+		id: result.id,
+		username: result.username,
+	};
 };
 
 // ユーザー情報の取得
