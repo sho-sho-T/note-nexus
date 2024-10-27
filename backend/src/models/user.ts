@@ -38,11 +38,20 @@ export const create = async (
 export const findById = async (
 	db: D1Database,
 	userId: number,
-): Promise<User | null> => {
-	return await db
+): Promise<SafeUser | null> => {
+	const result = await db
 		.prepare("SELECT * FROM users WHERE id = ?")
 		.bind(userId)
-		.first();
+		.first<User>();
+
+	if (!result) {
+		throw new Error("ユーザーが見つかりません");
+	}
+
+	return {
+		id: result.id,
+		username: result.username,
+	};
 };
 
 // ユーザー名からユーザー情報を取得
