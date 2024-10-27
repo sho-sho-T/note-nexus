@@ -54,17 +54,6 @@ export const findById = async (
 	};
 };
 
-// ユーザー名からユーザー情報を取得
-export const findByUsername = async (
-	db: D1Database,
-	username: string,
-): Promise<User | null> => {
-	return await db
-		.prepare("SELECT * FROM users WHERE username = ?")
-		.bind(username)
-		.first();
-};
-
 // ユーザー情報の更新
 export const update = async (
 	db: D1Database,
